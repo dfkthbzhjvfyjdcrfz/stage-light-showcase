@@ -1,2 +1,2 @@
-# my-1st-web-light-portfolio
+# my-1st-web-portfolio
 personal website
