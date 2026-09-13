@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono&family=Orbitron&family=Inter&display=swap" rel="stylesheet">
+    <title>✦ WHERE IS MY LASERrr ? ✦</title>
+    <style>
+        /* ===== ОБЩИЕ ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: black;
+            font-family: 'Courier New', monospace;
+        }
+        .black-board {
+            max-width: 1500px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: black;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== КУРСОР ===== */
+        body {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24"><text x="0" y="20" font-size="20" fill="%2300aaff">✦</text></svg>') 16 16, auto;
+        }
+        a, button, .insta-item, .video-section, .effect-button {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24"><text x="0" y="20" font-size="20" fill="%2300aaff">✦</text></svg>') 16 16, pointer;
+        }
+
+        /* ===== ГЛИТЧ ===== */
+        .glitch-active {
+            animation: glitch 0.1s infinite;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); filter: hue-rotate(0deg) brightness(1); }
+            20% { transform: translate(-3px, 2px); filter: hue-rotate(90deg) brightness(1.5); }
+            40% { transform: translate(3px, -2px); filter: hue-rotate(180deg) brightness(0.8); }
+            60% { transform: translate(-2px, 3px); filter: hue-rotate(270deg) brightness(1.3); }
+            80% { transform: translate(2px, -3px); filter: hue-rotate(360deg) brightness(0.9); }
+            100% { transform: translate(0); filter: hue-rotate(0deg) brightness(1); }
+        }
+
+        /* ===== СТРОБ (через ::before) ===== */
+        .strobe-active::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            animation: softStrobe 0.08s infinite !important;
+        }
+        @keyframes softStrobe {
+            0% { background-color: rgba(0,0,0,0); backdrop-filter: blur(0px) brightness(1) contrast(1) hue-rotate(0deg); transform: skew(0deg,0deg); }
+            25% { background-color: rgba(255,255,255,0.4); backdrop-filter: blur(2px) brightness(1.5) contrast(1.3) hue-rotate(45deg); transform: skew(1deg,0.5deg); }
+            50% { background-color: rgba(255,255,255,0.7); backdrop-filter: blur(6px) brightness(2.5) contrast(2) hue-rotate(180deg) invert(0.15); transform: skew(-1.5deg,1deg); }
+            75% { background-color: rgba(255,255,255,0.4); backdrop-filter: blur(3px) brightness(1.8) contrast(1.5) hue-rotate(270deg); transform: skew(2deg,-3deg); }
+            100% { background-color: rgba(0,0,0,0); backdrop-filter: blur(0px) brightness(1) contrast(1) hue-rotate(0deg); transform: scale(2) translate(2%,-1%) rotate(2deg) skew(2deg,2deg); }
+        }
+
+        /* ===== ШАПКА ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding-bottom: 0;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            font-size: 4em;
+            color: #00aaff;
+            text-transform: lowercase;
+            font-family: 'Courier New', monospace;
+        }
+        .header p {
+            color: #00aaff;
+            font-size: 2em;
+            text-transform: lowercase;
+        }
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        /* ===== КНОПКИ ===== */
+        .button-panel {
+            display: flex;
+            gap: 20px;
+        }
+        .effect-button {
+            background: transparent;
+            color: #00aaff;
+            border: 3px solid #00aaff;
+            padding: 15px 30px;
+            font-size: 1.5em;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            user-select: none;
+        }
+        .effect-button:active {
+            background: #00aaff;
+            color: black;
+            transform: scale(0.95);
+        }
+        .effect-button.glitch:active {
+            background: #ff00ff;
+            border-color: #ff00ff;
+            box-shadow: 0 0 30px #ff00ff;
+        }
+        .effect-button.strobe:active {
+            background: white;
+            border-color: white;
+            color: black;
+            box-shadow: 0 0 30px white;
+        }
+
+        /* ===== ПРЕДУПРЕЖДЕНИЕ ===== */
+        .warning {
+            font-size: 0.7em;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: right;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            max-width: 280px;
+        }
+        .warning:hover { opacity: 1; }
+        .warning-blink {
+            animation: cautionBlink 1.2s infinite;
+            font-weight: bold;
+            color: #ff6680;
+        }
+        @keyframes cautionBlink {
+            0% { opacity: 1; text-shadow: 0 0 0 #ff6680; }
+            50% { opacity: 0.5; text-shadow: 0 0 3px #ff6680; }
+            100% { opacity: 1; text-shadow: 0 0 0 #ff6680; }
+        }
+
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+        .main-content { padding: 40px 0; text-align: left; }
+        .main-content h2 {
+            font-size: 5em;
+            color: white;
+            text-transform: uppercase;
+        }
+        .main-content h2 span { color: #00aaff; }
+        .main-content .question {
+            font-size: 3em;
+            color: #00aaff;
+            margin: 30px 0;
+            letter-spacing: 10px;
+        }
+        .main-content .invite {
+            color: #00aaff;
+            font-size: 2.5em;
+            text-transform: uppercase;
+            margin-top: 20px;
+            line-height: 1.3;
+        }
+
+        /* ===== ГЛАЗА ===== */
+        .eyes-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 200px;
+            padding: 50px 0;
+            border-top: 4px solid #00aaff;
+        }
+        .eye-left {
+            position: relative;
+            width: 400px;
+            height: 160px;
+            clip-path: path("M5,55 C50,5 130,2 180,2 C230,2 310,5 395,55 C420,95 310,150 230,155 C150,160 80,145 25,105 C3,85 3,70 5,55");
+            background: #00aaff;
+            transition: all 0.1s ease;
+        }
+        .eye-right {
+            position: relative;
+            width: 455px;
+            height: 155px;
+            clip-path: path("M5,55 C50,5 130,2 180,2 C230,2 310,5 395,55 C420,95 310,150 230,155 C150,160 80,145 25,105 C3,85 3,70 5,55");
+            transform: scaleX(-1);
+            background: #00aaff;
+            transition: all 0.1s ease;
+        }
+        .pupil {
+            position: absolute;
+            width: 75px;
+            height: 200px;
+            background: black;
+            border-radius: 45% / 49%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.08s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+            will-change: transform;
+        }
+        .eye-left.blinking {
+            clip-path: path("M20,65 C20,65 90,65 160,65 C230,65 300,65 330,65 C330,65 300,90 230,95 C160,100 90,95 45,85 C20,75 20,70 20,65");
+            background: #00aaff;
+            opacity: 1;
+        }
+        .eye-right.blinking {
+            clip-path: path("M20,65 C20,65 90,65 160,65 C230,65 300,65 330,65 C330,65 300,90 230,95 C160,100 90,95 45,85 C20,75 20,70 20,65");
+            transform: scaleX(-1);
+            background: #00aaff;
+            opacity: 1;
+        }
+
+        /* ===== ВИДЕОГАЛЕРЕЯ ===== */
+        .video-section {
+            margin: 40px 0;
+            padding: 20px;
+        }
+        .video-title {
+            color: #00aaff;
+            font-size: 2em;
+            margin-bottom: 44px;
+            text-transform: uppercase;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* ===== ИНСТА-ГАЛЛЕРЕЯ ===== */
+        .insta-gallery {
+            margin: 60px 0;
+            padding: 40px 0;
+            border-bottom: 4px solid #00aaff;
+        }
+        .insta-title {
+            font-size: 3em;
+            color: #00aaff;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            text-align: left;
+        }
+        .performance-title {
+            font-size: 2.2em;
+            color: #00aaff;
+            margin: 20px 0 30px 0;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border-left: 4px solid #00aaff;
+            padding-left: 20px;
+            text-align: left;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+        .insta-carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 20px 0;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .insta-item {
+            flex: 0 0 300px;
+            height: 300px;
+            scroll-snap-align: start;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+        .insta-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .insta-item:hover {
+            transform: scale(1.02);
+        }
+        /* Ползунок */
+        .insta-carousel::-webkit-scrollbar {
+            height: 8px;
+        }
+        .insta-carousel::-webkit-scrollbar-track {
+            background: #222;
+            border-radius: 4px;
+        }
+        .insta-carousel::-webkit-scrollbar-thumb {
+            background: #00aaff;
+            border-radius: 4px;
+            box-shadow: 0 0 10px #00aaff;
+        }
+        .insta-carousel::-webkit-scrollbar-thumb:hover {
+            background: white;
+            box-shadow: 0 0 15px white;
+        }
+        .insta-carousel {
+            scrollbar-width: thin;
+            scrollbar-color: #00aaff #222;
+        }
+
+        /* ===== КОНТАКТЫ ===== */
+        .contact-box-title {
+            font-size: 2.5em;
+            color: #00aaff;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            text-align: center;
+        }
+        .contact-box-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .contact-box-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: #00aaff;
+        }
+        .contact-box-item:hover {
+            background: #00aaff;
+            color: black;
+            transform: scale(1.02);
+        }
+        .contact-box-icon {
+            font-size: 2.5em;
+            color: inherit;
+        }
+        .contact-box-item:hover .contact-box-icon {
+            color: black;
+        }
+        .contact-box-text {
+            font-size: 1.3em;
+            color: #00aaff;
+            text-transform: lowercase;
+            letter-spacing: 1px;
+            word-break: break-all;
+        }
+        .contact-box-item:hover .contact-box-text {
+            color: black;
+        }
+
+        /* ===== НИЗ ===== */
+        .bottom-text {
+            padding: 40px 0;
+        }
+        .bottom-text .line1 {
+            font-size: 4em;
+            color: #00aaff;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .bottom-text .line2 {
+            font-size: 3.5em;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 10px 0;
+        }
+        .bottom-text .line3 {
+            font-size: 2.5em;
+            color: #00aaff;
+            text-transform: uppercase;
+            line-height: 1.3;
+            max-width: 80%;
+        }
+        .footer {
+            text-align: right;
+            padding-top: 30px;
+            margin-top: 60px;
+            border-top: 4px solid #00aaff;
+            color: #00aaff;
+            font-size: 1.2em;
+            text-transform: uppercase;
+        }
+
+        /* ===== МОДАЛКА (фото) ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.98);
+        }
+        .modal-image {
+            max-width: 100vw;
+            max-height: 100vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #00aaff;
+            font-size: 4em;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        .modal-close:hover {
+            color: white;
+        }
+        .modal-prev, .modal-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #00aaff;
+            font-size: 4em;
+            cursor: pointer;
+            padding: 20px;
+            z-index: 1001;
+        }
+        .modal-prev { left: 20px; }
+        .modal-next { right: 20px; }
+        .modal-prev:hover, .modal-next:hover {
+            color: white;
+        }
+
+        /* ===== МОБИЛЬНАЯ ВЕРСИЯ ===== */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .black-board { padding: 15px; }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .header h1 { font-size: 2.2em; }
+            .header p { font-size: 1.2em; }
+            .header-right {
+                width: 100%;
+                align-items: stretch;
+            }
+            .button-panel {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+            .effect-button {
+                width: 100%;
+                text-align: center;
+                font-size: 1.2em;
+                padding: 12px;
+            }
+            .warning {
+                max-width: 100%;
+                font-size: 0.6em;
+                text-align: center;
+                margin-top: 5px;
+            }
+            .eyes-container {
+                gap: 30px;
+                padding: 30px 0;
+                flex-direction: row;
+                flex-wrap: nowrap;
+            }
+            .eye-left, .eye-right {
+                width: 160px;
+                height: 70px;
+            }
+            .eye-left {
+                clip-path: path("M20,58 C20,18 95,2 170,8 C245,14 315,28 340,62 C365,96 305,138 235,146 C165,154 95,146 48,112 C20,92 20,72 20,58");
+            }
+            .eye-right {
+                clip-path: path("M20,58 C20,18 95,2 170,8 C245,14 315,28 340,62 C365,96 305,138 235,146 C165,154 95,146 48,112 C20,92 20,72 20,58");
+                transform: scaleX(-1);
+            }
+            .pupil {
+                width: 30px;
+                height: 60px;
+                border-radius: 40% / 50%;
+            }
+            .main-content h2 { font-size: 2.5em; }
+            .main-content .question { font-size: 1.8em; margin: 15px 0; }
+            .main-content .invite { font-size: 1.5em; }
+            .video-section { padding: 10px; margin: 15px 0; }
+            .video-title { font-size: 1.2em; margin-bottom: 20px; }
+            .insta-gallery { padding: 15px 0; margin: 20px 0; }
+            .insta-title { font-size: 2em; }
+            .performance-title {
+                font-size: 1.2em;
+                border-left-width: 3px;
+                padding-left: 15px;
+                margin: 10px 0 20px 0;
+            }
+            .insta-item {
+                flex: 0 0 160px;
+                height: 160px;
+            }
+            .insta-carousel { gap: 12px; padding: 10px 0; }
+            .contact-box { padding: 15px; margin: 20px 0; }
+            .contact-box-title { font-size: 2em; letter-spacing: 5px; margin-bottom: 20px; }
+            .contact-box-content { gap: 12px; }
+            .contact-box-item { padding: 12px; gap: 12px; }
+            .contact-box-icon { font-size: 2em; }
+            .contact-box-text { font-size: 1em; }
+            .bottom-text .line1 { font-size: 2.2em; }
+            .bottom-text .line2 { font-size: 1.8em; }
+            .bottom-text .line3 { font-size: 1.2em; max-width: 100%; }
+            .footer { font-size: 0.9em; text-align: center; margin-top: 20px; padding-top: 20px; }
+            .modal-prev, .modal-next { font-size: 2.5em; padding: 10px; }
+            .modal-close { font-size: 3em; top: 15px; right: 20px; }
+            .modal-image { max-width: 95vw; max-height: 85vh; }
+        }
+    </style>
+</head>
+<body>
+    <div class="black-board" id="main-board">
+        <div class="header">
+            <div>
+                <h1>✦ LEND ME A LIGHT ✦</h1>
+                <p>don't be afraid</p>
+            </div>
+            <div class="header-right">
+                <div class="button-panel">
+                    <button class="effect-button glitch" id="glitchBtn" onmousedown="startEffect('glitch')" onmouseup="stopEffect('glitch')" onmouseleave="stopEffect('glitch')">HAVE FUN</button>
+                    <button class="effect-button strobe" id="strobeBtn">GO INSANE</button>
+                </div>
+                <div class="warning">
+                    <span class="warning-blink">⚠️ WARNING:</span> STROBE & GLITCH EFFECTS.
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <h2><span>YOU</span> SEE, <span>HUH</span>??</h2>
+            <div class="question">● ● ●</div>
+            <div class="invite">
+                IF EVERYTHING IS ENERGY,<br>
+                LET YOURS SHINE.
+            </div>
+        </div>
+
+        <div class="eyes-container">
+            <div class="eye-left" id="eye1">
+                <div class="pupil" id="pupil1"></div>
+            </div>
+            <div class="eye-right" id="eye2">
+                <div class="pupil" id="pupil2"></div>
+            </div>
+        </div>
+
+        <!-- ВИДЕОГАЛЕРЕЯ -->
+        <div class="video-gallery">
+            <div class="video-section">
+                <div class="video-title">✦ AZAMAT AGRABA (ft. ISENTIE) - OPUS 3 ✦</div>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/UrWyVpgDL_0" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="video-section">
+                <div class="video-title">✦ FLATY Live at GOST ZVUK 220825 ✦</div>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/rX3bLuJd3lg" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="video-section">
+                <div class="video-title">✦ NEDOSTUPNOST 20.10.25 ✦</div>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/CVVg103jWsk" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="video-section">
+                <div class="video-title">✦ Subspace 4D 22.11 // AMA performance ✦</div>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/vTxyFkGqYes" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="video-section">
+                <div class="video-title">✦ MC MYASNOI — liquid lung ✦</div>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/g5FP4sCnXkU" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- ИНСТА-ГАЛЛЕРЕЯ -->
+        <div class="insta-gallery">
+            <div class="performance-title">ArtGroup AMA & Hajime Kajiro performance</div>
+            <div class="insta-carousel" id="instaCarousel">
+                <div class="insta-item" onclick="openInstaModal(0)">
+                    <img src="https://i.pinimg.com/736x/8e/c1/1b/8ec11b91647943a3641b4fd45cab9c0b.jpg" alt="Art Group 1">
+                </div>
+                <div class="insta-item" onclick="openInstaModal(1)">
+                    <img src="https://i.pinimg.com/736x/12/f3/de/12f3de1534f832d270f7cf7482d3557c.jpg" alt="Art Group 2">
+                </div>
+                <div class="insta-item" onclick="openInstaModal(2)">
+                    <img src="https://i.pinimg.com/736x/fc/16/59/fc165937a93f39fed5d0050da0e608ad.jpg" alt="Art Group 3">
+                </div>
+                <div class="insta-item" onclick="openInstaModal(3)">
+                    <img src="https://i.pinimg.com/736x/df/06/2c/df062cebc5d666a7a19fe6b6a2ae5c17.jpg" alt="Art Group 4">
+                </div>
+                <div class="insta-item" onclick="openInstaModal(4)">
+                    <img src="https://i.pinimg.com/736x/ff/6a/36/ff6a3672c927236900ac389058519abe.jpg" alt="Art Group 5">
+                </div>
+            </div>
+        </div>
+
+        <!-- МОДАЛКА -->
+        <div class="modal" id="modal">
+            <div class="modal-close" onclick="closeModal()">✕</div>
+            <div class="modal-prev" onclick="prevImage()">‹</div>
+            <div class="modal-next" onclick="nextImage()">›</div>
+            <div class="modal-content">
+                <img class="modal-image" id="modalImage" src="" alt="">
+            </div>
+        </div>
+
+        <div class="bottom-text">
+            <div class="line1">✦ I LOVE YOU ✦</div>
+            <div class="line2">lil bitch</div>
+            <div class="line3">YOU SEE HUH?? ПРИСЯДЬ РАССКАЖИ ПОБОЛЬШЕ ●</div>
+        </div>
+
+        <div class="contact-box">
+            <div class="contact-box-title">✦ СВЯЗЬ ✦</div>
+            <div class="contact-box-content">
+                <a href="mailto:jointme@space.com" class="contact-box-item">
+                    <span class="contact-box-icon">✉</span>
+                    <span class="contact-box-text">jointme@space.com</span>
+                </a>
+                <a href="https://t.me/твой_ник" target="_blank" class="contact-box-item">
+                    <span class="contact-box-icon">✆</span>
+                    <span class="contact-box-text">tg: @Infantjoyfromabyss</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            ● 2026 ● FOOL MOON ● MIND ● LOVE ●
+        </div>
+    </div>
+
+    <script>
+        const mainBoard = document.getElementById('main-board');
+
+        function startEffect(effect) {
+            if (effect === 'glitch') {
+                mainBoard.classList.add('glitch-active');
+                mainBoard.classList.remove('strobe-active');
+            } else if (effect === 'strobe') {
+                mainBoard.classList.add('strobe-active');
+                mainBoard.classList.remove('glitch-active');
+            }
+        }
+
+        function stopEffect(effect) {
+            mainBoard.classList.remove('glitch-active', 'strobe-active');
+        }
+
+        // СТРОБ-КНОПКА (зажимается)
+        const strobeBtn = document.getElementById('strobeBtn');
+        strobeBtn.addEventListener('mousedown', () => {
+            document.body.classList.add('strobe-active');
+        });
+        strobeBtn.addEventListener('mouseup', () => {
+            document.body.classList.remove('strobe-active');
+        });
+        strobeBtn.addEventListener('mouseleave', () => {
+            document.body.classList.remove('strobe-active');
+        });
+
+        // ДВИЖЕНИЕ ЗРАЧКОВ
+        document.addEventListener('mousemove', function(event) {
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+            moveLeftPupil('pupil1', mouseX, mouseY);
+            moveRightPupil('pupil2', mouseX, mouseY);
+        });
+
+        function moveLeftPupil(pupilId, mouseX, mouseY) {
+            const pupil = document.getElementById(pupilId);
+            if (!pupil) return;
+            const eye = pupil.parentElement;
+            const eyeRect = eye.getBoundingClientRect();
+            const eyeCenterX = eyeRect.left + eyeRect.width / 2;
+            const eyeCenterY = eyeRect.top + eyeRect.height / 2;
+            const deltaX = mouseX - eyeCenterX;
+            const deltaY = mouseY - eyeCenterY;
+            const maxMoveX = 45, maxMoveY = 70;
+            let moveX = deltaX, moveY = deltaY;
+            if (Math.abs(deltaX) > maxMoveX) moveX = (deltaX / Math.abs(deltaX)) * maxMoveX;
+            if (Math.abs(deltaY) > maxMoveY) moveY = (deltaY / Math.abs(deltaY)) * maxMoveY;
+            pupil.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+        }
+
+        function moveRightPupil(pupilId, mouseX, mouseY) {
+            const pupil = document.getElementById(pupilId);
+            if (!pupil) return;
+            const eye = pupil.parentElement;
+            const eyeRect = eye.getBoundingClientRect();
+            const eyeCenterX = eyeRect.left + eyeRect.width / 2;
+            const eyeCenterY = eyeRect.top + eyeRect.height / 2;
+            const deltaX = (mouseX - eyeCenterX) * -1;
+            const deltaY = mouseY - eyeCenterY;
+            const maxMoveX = 45, maxMoveY = 70;
+            let moveX = deltaX, moveY = deltaY;
+            if (Math.abs(deltaX) > maxMoveX) moveX = (deltaX / Math.abs(deltaX)) * maxMoveX;
+            if (Math.abs(deltaY) > maxMoveY) moveY = (deltaY / Math.abs(deltaY)) * maxMoveY;
+            pupil.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+        }
+
+        // МОРГАНИЕ
+        function blink() {
+            const eyes = document.querySelectorAll('.eye-left, .eye-right');
+            eyes.forEach(eye => {
+                eye.classList.add('blinking');
+                setTimeout(() => eye.classList.remove('blinking'), 150);
+            });
+        }
+        function scheduleBlink() {
+            setTimeout(() => {
+                blink();
+                scheduleBlink();
+            }, Math.random() * 1000 + 4000);
+        }
+        scheduleBlink();
+
+        // МОДАЛКА
+        let currentImages = [], currentIndex = 0;
+        const modal = document.getElementById('modal');
+        const modalImage = document.getElementById('modalImage');
+
+        function openInstaModal(index) {
+            const items = document.querySelectorAll('.insta-item img');
+            currentImages = Array.from(items).map(img => img.src);
+            currentIndex = index;
+            modalImage.src = currentImages[index];
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function prevImage() {
+            currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
+            modalImage.src = currentImages[currentIndex];
+        }
+
+        function nextImage() {
+            currentIndex = (currentIndex + 1) % currentImages.length;
+            modalImage.src = currentImages[currentIndex];
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!modal.classList.contains('active')) return;
+            if (e.key === 'Escape') closeModal();
+            if (e.key === 'ArrowLeft') { e.preventDefault(); prevImage(); }
+            if (e.key === 'ArrowRight') { e.preventDefault(); nextImage(); }
+        });
+
+        window.addEventListener('load', function() {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            moveLeftPupil('pupil1', centerX, centerY);
+            moveRightPupil('pupil2', centerX, centerY);
+        });
+    </script>
+</body>
+</html>
